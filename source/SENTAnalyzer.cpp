@@ -25,50 +25,38 @@ void SENTAnalyzer::SetupResults()
 void SENTAnalyzer::WorkerThread()
 {
 	mSampleRateHz = GetSampleRate();
+	U32 theoretical_samples_per_ticks = mSampleRateHz * mSettings->tick_time_us / 1000000;
 
 	mSerial = GetAnalyzerChannelData( mSettings->mInputChannel );
 
 	if( mSerial->GetBitState() == BIT_LOW )
 		mSerial->AdvanceToNextEdge();
+	mSerial->AdvanceToNextEdge();
 
-	U32 samples_per_bit = mSampleRateHz / mSettings->tick_time_us;
-	U32 samples_to_first_center_of_first_data_bit = U32( 1.5 * double( mSampleRateHz ) / double( mSettings->tick_time_us ) );
+	U64 starting_sample;
 
 	for( ; ; )
 	{
-		U8 data = 0;
-		U8 mask = 1 << 7;
+		starting_sample = mSerial->GetSampleNumber();
+		mSerial->AdvanceToNextEdge();
+		mSerial->AdvanceToNextEdge();
 
-		mSerial->AdvanceToNextEdge(); //falling edge -- beginning of the start bit
+		float number_of_ticks = (mSerial->GetSampleNumber() - starting_sample) / theoretical_samples_per_ticks;
 
-		U64 starting_sample = mSerial->GetSampleNumber();
-
-		mSerial->Advance( samples_to_first_center_of_first_data_bit );
-
-		for( U32 i=0; i<8; i++ )
+		if(number_of_ticks > 55 && number_of_ticks < 57)
 		{
-			//let's put a dot exactly where we sample this bit:
 			mResults->AddMarker( mSerial->GetSampleNumber(), AnalyzerResults::Dot, mSettings->mInputChannel );
+			//we have a byte to save.
+			Frame frame;
+			frame.mData1 = 0;
+			frame.mFlags = 0;
+			frame.mStartingSampleInclusive = starting_sample;
+			frame.mEndingSampleInclusive = mSerial->GetSampleNumber();
 
-			if( mSerial->GetBitState() == BIT_HIGH )
-				data |= mask;
-
-			mSerial->Advance( samples_per_bit );
-
-			mask = mask >> 1;
+			mResults->AddFrame( frame );
+			mResults->CommitResults();
+			ReportProgress( frame.mEndingSampleInclusive );
 		}
-
-
-		//we have a byte to save.
-		Frame frame;
-		frame.mData1 = data;
-		frame.mFlags = 0;
-		frame.mStartingSampleInclusive = starting_sample;
-		frame.mEndingSampleInclusive = mSerial->GetSampleNumber();
-
-		mResults->AddFrame( frame );
-		mResults->CommitResults();
-		ReportProgress( frame.mEndingSampleInclusive );
 	}
 }
 
@@ -90,7 +78,7 @@ U32 SENTAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_s
 
 U32 SENTAnalyzer::GetMinimumSampleRateHz()
 {
-	return mSettings->tick_time_us * 4;
+	return 2000000 / mSettings->tick_time_us ;
 }
 
 const char* SENTAnalyzer::GetAnalyzerName() const
