@@ -20,8 +20,7 @@ protected:
 
 protected:
 	void CreateSerialByte();
-	std::string mSerialText;
-	U32 mStringIndex;
+	void AddNibble(U16 number_of_ticks, U16 samples_per_tick);
 
 	SimulationChannelDescriptor mSerialSimulationData;
 

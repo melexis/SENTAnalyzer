@@ -4,20 +4,20 @@
 
 SENTAnalyzerSettings::SENTAnalyzerSettings()
 :	mInputChannel( UNDEFINED_CHANNEL ),
-	mBitRate( 9600 )
+	tick_time_us( 3 )
 {
 	mInputChannelInterface.reset( new AnalyzerSettingInterfaceChannel() );
 	mInputChannelInterface->SetTitleAndTooltip( "Serial", "Standard SENT (SAE J2716)" );
 	mInputChannelInterface->SetChannel( mInputChannel );
 
-	mBitRateInterface.reset( new AnalyzerSettingInterfaceInteger() );
-	mBitRateInterface->SetTitleAndTooltip( "Bit Rate (Bits/S)",  "Specify the bit rate in bits per second." );
-	mBitRateInterface->SetMax( 6000000 );
-	mBitRateInterface->SetMin( 1 );
-	mBitRateInterface->SetInteger( mBitRate );
+	TickTimeInterface.reset( new AnalyzerSettingInterfaceInteger() );
+	TickTimeInterface->SetTitleAndTooltip( "tick time (us)",  "Specify the SENT tick time in microseconds" );
+	TickTimeInterface->SetMax( 50 );
+	TickTimeInterface->SetMin( 0.5);
+	TickTimeInterface->SetInteger( tick_time_us );
 
 	AddInterface( mInputChannelInterface.get() );
-	AddInterface( mBitRateInterface.get() );
+	AddInterface( TickTimeInterface.get() );
 
 	AddExportOption( 0, "Export as text/csv file" );
 	AddExportExtension( 0, "text", "txt" );
@@ -34,7 +34,7 @@ SENTAnalyzerSettings::~SENTAnalyzerSettings()
 bool SENTAnalyzerSettings::SetSettingsFromInterfaces()
 {
 	mInputChannel = mInputChannelInterface->GetChannel();
-	mBitRate = mBitRateInterface->GetInteger();
+	tick_time_us = TickTimeInterface->GetInteger();
 
 	ClearChannels();
 	AddChannel( mInputChannel, "SENT (SAE J2716)", true );
@@ -45,7 +45,7 @@ bool SENTAnalyzerSettings::SetSettingsFromInterfaces()
 void SENTAnalyzerSettings::UpdateInterfacesFromSettings()
 {
 	mInputChannelInterface->SetChannel( mInputChannel );
-	mBitRateInterface->SetInteger( mBitRate );
+	TickTimeInterface->SetInteger( tick_time_us );
 }
 
 void SENTAnalyzerSettings::LoadSettings( const char* settings )
@@ -54,7 +54,7 @@ void SENTAnalyzerSettings::LoadSettings( const char* settings )
 	text_archive.SetString( settings );
 
 	text_archive >> mInputChannel;
-	text_archive >> mBitRate;
+	text_archive >> tick_time_us;
 
 	ClearChannels();
 	AddChannel( mInputChannel, "SENT (SAE J2716)", true );
@@ -67,7 +67,7 @@ const char* SENTAnalyzerSettings::SaveSettings()
 	SimpleArchive text_archive;
 
 	text_archive << mInputChannel;
-	text_archive << mBitRate;
+	text_archive << tick_time_us;
 
 	return SetReturnString( text_archive.GetString() );
 }

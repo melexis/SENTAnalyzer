@@ -3,7 +3,7 @@
 #include <AnalyzerChannelData.h>
 
 SENTAnalyzer::SENTAnalyzer()
-:	Analyzer2(),  
+:	Analyzer2(),
 	mSettings( new SENTAnalyzerSettings() ),
 	mSimulationInitilized( false )
 {
@@ -31,14 +31,14 @@ void SENTAnalyzer::WorkerThread()
 	if( mSerial->GetBitState() == BIT_LOW )
 		mSerial->AdvanceToNextEdge();
 
-	U32 samples_per_bit = mSampleRateHz / mSettings->mBitRate;
-	U32 samples_to_first_center_of_first_data_bit = U32( 1.5 * double( mSampleRateHz ) / double( mSettings->mBitRate ) );
+	U32 samples_per_bit = mSampleRateHz / mSettings->tick_time_us;
+	U32 samples_to_first_center_of_first_data_bit = U32( 1.5 * double( mSampleRateHz ) / double( mSettings->tick_time_us ) );
 
 	for( ; ; )
 	{
 		U8 data = 0;
 		U8 mask = 1 << 7;
-		
+
 		mSerial->AdvanceToNextEdge(); //falling edge -- beginning of the start bit
 
 		U64 starting_sample = mSerial->GetSampleNumber();
@@ -59,7 +59,7 @@ void SENTAnalyzer::WorkerThread()
 		}
 
 
-		//we have a byte to save. 
+		//we have a byte to save.
 		Frame frame;
 		frame.mData1 = data;
 		frame.mFlags = 0;
@@ -90,7 +90,7 @@ U32 SENTAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_s
 
 U32 SENTAnalyzer::GetMinimumSampleRateHz()
 {
-	return mSettings->mBitRate * 4;
+	return mSettings->tick_time_us * 4;
 }
 
 const char* SENTAnalyzer::GetAnalyzerName() const

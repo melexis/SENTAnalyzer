@@ -15,13 +15,13 @@ public:
 	virtual void LoadSettings( const char* settings );
 	virtual const char* SaveSettings();
 
-	
+
 	Channel mInputChannel;
-	U32 mBitRate;
+	U32 tick_time_us;
 
 protected:
 	std::auto_ptr< AnalyzerSettingInterfaceChannel >	mInputChannelInterface;
-	std::auto_ptr< AnalyzerSettingInterfaceInteger >	mBitRateInterface;
+	std::auto_ptr< AnalyzerSettingInterfaceInteger >	TickTimeInterface;
 };
 
 #endif //SENT_ANALYZER_SETTINGS
