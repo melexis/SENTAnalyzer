@@ -17,7 +17,7 @@ public:
 
 
 	Channel mInputChannel;
-	U32 tick_time_us;
+	U32 tick_time_half_us;
 
 protected:
 	std::auto_ptr< AnalyzerSettingInterfaceChannel >	mInputChannelInterface;

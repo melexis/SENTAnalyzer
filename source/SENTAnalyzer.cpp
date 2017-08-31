@@ -22,10 +22,22 @@ void SENTAnalyzer::SetupResults()
 	mResults->AddChannelBubblesWillAppearOn( mSettings->mInputChannel );
 }
 
+void SENTAnalyzer::addSENTFrame(U16 ticks, U64 start, U64 end)
+{
+	Frame frame;
+	frame.mData1 = ticks;
+	frame.mFlags = 0;
+	frame.mStartingSampleInclusive = start;
+	frame.mEndingSampleInclusive = end;
+	mResults->AddFrame( frame );
+	mResults->CommitResults();
+	ReportProgress( frame.mEndingSampleInclusive );
+}
+
 void SENTAnalyzer::WorkerThread()
 {
 	mSampleRateHz = GetSampleRate();
-	U32 theoretical_samples_per_ticks = mSampleRateHz * mSettings->tick_time_us / 1000000;
+	U32 theoretical_samples_per_ticks = mSampleRateHz * (mSettings->tick_time_half_us / 2.0) / 1000000;
 
 	mSerial = GetAnalyzerChannelData( mSettings->mInputChannel );
 
@@ -40,23 +52,13 @@ void SENTAnalyzer::WorkerThread()
 		starting_sample = mSerial->GetSampleNumber();
 		mSerial->AdvanceToNextEdge();
 		mSerial->AdvanceToNextEdge();
-
 		float number_of_ticks = (mSerial->GetSampleNumber() - starting_sample) / theoretical_samples_per_ticks;
 
 		if(number_of_ticks > 55 && number_of_ticks < 57)
 		{
-			mResults->AddMarker( mSerial->GetSampleNumber(), AnalyzerResults::Dot, mSettings->mInputChannel );
-			//we have a byte to save.
-			Frame frame;
-			frame.mData1 = 0;
-			frame.mFlags = 0;
-			frame.mStartingSampleInclusive = starting_sample;
-			frame.mEndingSampleInclusive = mSerial->GetSampleNumber();
-
-			mResults->AddFrame( frame );
-			mResults->CommitResults();
-			ReportProgress( frame.mEndingSampleInclusive );
+			mResults->CommitPacketAndStartNewPacket();
 		}
+		addSENTFrame(number_of_ticks, starting_sample + 1, mSerial->GetSampleNumber());
 	}
 }
 
@@ -78,7 +80,7 @@ U32 SENTAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_s
 
 U32 SENTAnalyzer::GetMinimumSampleRateHz()
 {
-	return 2000000 / mSettings->tick_time_us ;
+	return 2000000 / (mSettings->tick_time_half_us / 2.0);
 }
 
 const char* SENTAnalyzer::GetAnalyzerName() const

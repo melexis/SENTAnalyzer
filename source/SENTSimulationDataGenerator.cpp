@@ -45,7 +45,7 @@ void SENTSimulationDataGenerator::AddNibble(U16 number_of_ticks, U16 samples_per
 
 void SENTSimulationDataGenerator::CreateSerialByte()
 {
-	U32 samples_per_tick = mSimulationSampleRateHz * mSettings->tick_time_us / 1000000;
+	U32 samples_per_tick = mSimulationSampleRateHz * ((float)mSettings->tick_time_half_us / 2.0) / 1000000;
 
 	mSerialSimulationData.Advance( samples_per_tick * 10 );
 
