@@ -6,6 +6,8 @@
 class SENTAnalyzer;
 class SENTAnalyzerSettings;
 
+enum SENTNibbleType { SyncPulse, StatusNibble, FCNibble, CRCNibble, PausePulse, Unknown};
+
 class SENTAnalyzerResults : public AnalyzerResults
 {
 public:
@@ -24,6 +26,7 @@ protected: //functions
 protected:  //vars
 	SENTAnalyzerSettings* mSettings;
 	SENTAnalyzer* mAnalyzer;
+	std::string FrameToString(Frame frame, DisplayBase display_base);
 };
 
 #endif //SENT_ANALYZER_RESULTS

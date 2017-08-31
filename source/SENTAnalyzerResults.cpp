@@ -4,6 +4,7 @@
 #include "SENTAnalyzerSettings.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 SENTAnalyzerResults::SENTAnalyzerResults( SENTAnalyzer* analyzer, SENTAnalyzerSettings* settings )
 :	AnalyzerResults(),
@@ -16,14 +17,46 @@ SENTAnalyzerResults::~SENTAnalyzerResults()
 {
 }
 
+std::string SENTAnalyzerResults::FrameToString(Frame frame, DisplayBase display_base)
+{
+	std::string retval = "";
+	std::stringstream ss;
+	char number_str[128];
+	switch( frame.mType )
+	{
+		case SyncPulse:
+			ss << "Sync pulse: ";
+			break;
+		case StatusNibble:
+			AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 4, number_str, 128 );
+			ss << "Status nibble: " << number_str;
+			break;
+		case FCNibble:
+			AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 4, number_str, 128 );
+			ss << "Fast channel data: " << number_str;
+			break;
+		case CRCNibble:
+			AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 4, number_str, 128 );
+			ss << "CRC data: " << number_str;
+			break;
+		case PausePulse:
+			AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 4, number_str, 128 );
+			ss << "Pause pulse length: " << number_str;
+			break;
+		case Unknown:
+			ss << "Unknown";
+			break;
+	}
+	return ss.str();
+}
+
 void SENTAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& channel, DisplayBase display_base )
 {
+	//we only need to pay attention to 'channel' if we're making bubbles for more than one channel (as set by AddChannelBubblesWillAppearOn)
 	ClearResultStrings();
 	Frame frame = GetFrame( frame_index );
 
-	char number_str[128];
-	AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
-	AddResultString( number_str );
+	AddResultString(FrameToString(frame, display_base).c_str());
 }
 
 void SENTAnalyzerResults::GenerateExportFile( const char* file, DisplayBase display_base, U32 export_type_user_id )
@@ -39,7 +72,7 @@ void SENTAnalyzerResults::GenerateExportFile( const char* file, DisplayBase disp
 	for( U32 i=0; i < num_frames; i++ )
 	{
 		Frame frame = GetFrame( i );
-		
+
 		char time_str[128];
 		AnalyzerHelpers::GetTimeString( frame.mStartingSampleInclusive, trigger_sample, sample_rate, time_str, 128 );
 
@@ -60,14 +93,11 @@ void SENTAnalyzerResults::GenerateExportFile( const char* file, DisplayBase disp
 
 void SENTAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBase display_base )
 {
-#ifdef SUPPORTS_PROTOCOL_SEARCH
-	Frame frame = GetFrame( frame_index );
 	ClearTabularText();
 
-	char number_str[128];
-	AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
-	AddTabularText( number_str );
-#endif
+	Frame frame = GetFrame( frame_index );
+
+	AddTabularText(FrameToString(frame, display_base).c_str());
 }
 
 void SENTAnalyzerResults::GeneratePacketTabularText( U64 packet_id, DisplayBase display_base )

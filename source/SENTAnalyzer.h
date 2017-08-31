@@ -34,7 +34,7 @@ protected: //vars
 	U32 mStartOfStopBitOffset;
 	U32 mEndOfStopBitOffset;
 
-	void addSENTFrame(U16 ticks, U64 start, U64 end);
+	void addSENTFrame(U16 ticks, enum SENTNibbleType type, U64 start, U64 end);
 };
 
 extern "C" ANALYZER_EXPORT const char* __cdecl GetAnalyzerName();

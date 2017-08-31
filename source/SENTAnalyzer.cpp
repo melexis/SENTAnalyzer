@@ -1,6 +1,11 @@
 #include "SENTAnalyzer.h"
 #include "SENTAnalyzerSettings.h"
 #include <AnalyzerChannelData.h>
+#include <math.h>
+
+#define STATUS_NIBBLE_NUMBER (1)
+#define CRC_NIBBLE_NUMBER (8)
+#define PAUSE_PULSE_NUMBER (9)
 
 SENTAnalyzer::SENTAnalyzer()
 :	Analyzer2(),
@@ -22,11 +27,12 @@ void SENTAnalyzer::SetupResults()
 	mResults->AddChannelBubblesWillAppearOn( mSettings->mInputChannel );
 }
 
-void SENTAnalyzer::addSENTFrame(U16 ticks, U64 start, U64 end)
+void SENTAnalyzer::addSENTFrame(U16 ticks, enum SENTNibbleType type, U64 start, U64 end)
 {
 	Frame frame;
 	frame.mData1 = ticks;
 	frame.mFlags = 0;
+	frame.mType = type;
 	frame.mStartingSampleInclusive = start;
 	frame.mEndingSampleInclusive = end;
 	mResults->AddFrame( frame );
@@ -46,9 +52,11 @@ void SENTAnalyzer::WorkerThread()
 	mSerial->AdvanceToNextEdge();
 
 	U64 starting_sample;
+	U8 nibble_counter = 0;
 
 	for( ; ; )
 	{
+		enum SENTNibbleType nibble_type = Unknown;
 		starting_sample = mSerial->GetSampleNumber();
 		mSerial->AdvanceToNextEdge();
 		mSerial->AdvanceToNextEdge();
@@ -57,8 +65,39 @@ void SENTAnalyzer::WorkerThread()
 		if(number_of_ticks > 55 && number_of_ticks < 57)
 		{
 			mResults->CommitPacketAndStartNewPacket();
+			nibble_type = SyncPulse;
+			nibble_counter = 0;
 		}
-		addSENTFrame(number_of_ticks, starting_sample + 1, mSerial->GetSampleNumber());
+		else if (nibble_counter == PAUSE_PULSE_NUMBER)
+		{
+			nibble_type = PausePulse;
+		}
+		else if (number_of_ticks > 11 && number_of_ticks < 28)
+		{
+			if(nibble_counter == STATUS_NIBBLE_NUMBER)
+			{
+				nibble_type = StatusNibble;
+				number_of_ticks = round(number_of_ticks) - 12;
+			}
+			else if (nibble_counter > STATUS_NIBBLE_NUMBER && nibble_counter < CRC_NIBBLE_NUMBER)
+			{
+				nibble_type = FCNibble;
+				number_of_ticks = round(number_of_ticks) - 12;
+			}
+			else if(nibble_counter == CRC_NIBBLE_NUMBER)
+			{
+				nibble_type = CRCNibble;
+				number_of_ticks = round(number_of_ticks) - 12;
+			}
+		}
+		else {} /* Do nothing. No valid frame was detected */
+
+		nibble_counter++;
+		addSENTFrame(number_of_ticks,
+					 nibble_type,
+				     starting_sample + 1,
+					 mSerial->GetSampleNumber());
+
 	}
 }
 
