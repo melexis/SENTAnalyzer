@@ -27,6 +27,7 @@ protected:  //vars
 	SENTAnalyzerSettings* mSettings;
 	SENTAnalyzer* mAnalyzer;
 	std::string FrameToString(Frame frame, DisplayBase display_base);
+	void InitializeTypeMap(void);
 };
 
 #endif //SENT_ANALYZER_RESULTS
