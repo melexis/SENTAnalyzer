@@ -19,11 +19,13 @@ public:
 	Channel mInputChannel;
 	U32 tick_time_half_us;
 	bool pausePulseEnabled;
+	U32 numberOfDataNibbles;
 
 protected:
 	std::auto_ptr< AnalyzerSettingInterfaceChannel >	mInputChannelInterface;
-	std::auto_ptr< AnalyzerSettingInterfaceInteger >	TickTimeInterface;
-	std::auto_ptr< AnalyzerSettingInterfaceBool >	PausePulseInterface;
+	std::auto_ptr< AnalyzerSettingInterfaceInteger >	tickTimeInterface;
+	std::auto_ptr< AnalyzerSettingInterfaceBool >		pausePulseInterface;
+	std::auto_ptr< AnalyzerSettingInterfaceInteger >	dataNibblesInterface;
 };
 
 #endif //SENT_ANALYZER_SETTINGS

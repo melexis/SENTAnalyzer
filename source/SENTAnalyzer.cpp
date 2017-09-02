@@ -91,7 +91,7 @@ bool SENTAnalyzer::isPulseSyncPulse(U16 number_of_ticks)
  *    total amount of ticks minus 12.\
  *
  *  TODO: Serial messaging
- *  TODO: configurable fast channel nibble amount + optional pause pulse
+ *  TODO: configurable fast channel nibble amount
  */
 void SENTAnalyzer::WorkerThread()
 {
@@ -175,7 +175,6 @@ void SENTAnalyzer::WorkerThread()
 
 		/* Commit the frame to the database and to the current packet */
 		addSENTFrame(number_of_ticks, nibble_type, starting_sample + 1,	 mSerial->GetSampleNumber());
-
 	}
 }
 
