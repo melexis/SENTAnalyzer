@@ -67,7 +67,7 @@ bool SENTAnalyzer::isPulseSyncPulse(U16 number_of_ticks)
 	bool retval = false;
 	if(number_of_ticks == 56)
 	{
-		if (nibble_counter == PAUSE_PULSE_NUMBER)
+		if ((mSettings->pausePulseEnabled) && (nibble_counter == PAUSE_PULSE_NUMBER))
 		{
 			retval = false;
 		}

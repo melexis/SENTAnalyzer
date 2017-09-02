@@ -47,41 +47,66 @@ void SENTSimulationDataGenerator::CreateSerialByte()
 {
 	U32 samples_per_tick = mSimulationSampleRateHz * ((float)mSettings->tick_time_half_us / 2.0) / 1000000;
 
-    /* First, a normal SENT frame */
+	if ( mSettings->pausePulseEnabled )
+	{
+	    /* First, a normal SENT frame */
 
-	/* Calibration pulse */
-	AddNibble(56, samples_per_tick);
-	/* Status nibble */
-	AddNibble(12, samples_per_tick);
-	/* Fast channel 1 */
-	AddNibble(27, samples_per_tick);
-	AddNibble(17, samples_per_tick);
-	AddNibble(22, samples_per_tick);
-	/* Fast channel 2 */
-	AddNibble(14, samples_per_tick);
-	AddNibble(20, samples_per_tick);
-	AddNibble(12, samples_per_tick);
-	/* CRC */
-	AddNibble(21, samples_per_tick);
-	/* Pause pulse */
-	AddNibble(100, samples_per_tick);
+		/* Calibration pulse */
+		AddNibble(56, samples_per_tick);
+		/* Status nibble */
+		AddNibble(12, samples_per_tick);
+		/* Fast channel 1 */
+		AddNibble(27, samples_per_tick);
+		AddNibble(17, samples_per_tick);
+		AddNibble(22, samples_per_tick);
+		/* Fast channel 2 */
+		AddNibble(14, samples_per_tick);
+		AddNibble(20, samples_per_tick);
+		AddNibble(12, samples_per_tick);
+		/* CRC */
+		AddNibble(21, samples_per_tick);
+		/* Pause pulse */
+		AddNibble(100, samples_per_tick);
 
-	/* Then, another valid SENT frame, but with a pause pulse the size of a sync pulse. Muhahahahaa */
+		/* Then, another valid SENT frame, but with a pause pulse the size of a sync pulse. Muhahahahaa */
 
-	/* Calibration pulse */
-	AddNibble(56, samples_per_tick);
-	/* Status nibble */
-	AddNibble(12, samples_per_tick);
-	/* Fast channel 1 */
-	AddNibble(27, samples_per_tick);
-	AddNibble(17, samples_per_tick);
-	AddNibble(22, samples_per_tick);
-	/* Fast channel 2 */
-	AddNibble(14, samples_per_tick);
-	AddNibble(20, samples_per_tick);
-	AddNibble(12, samples_per_tick);
-	/* CRC */
-	AddNibble(21, samples_per_tick);
-	/* Pause pulse */
-	AddNibble(56, samples_per_tick);
+		/* Calibration pulse */
+		AddNibble(56, samples_per_tick);
+		/* Status nibble */
+		AddNibble(12, samples_per_tick);
+		/* Fast channel 1 */
+		AddNibble(27, samples_per_tick);
+		AddNibble(17, samples_per_tick);
+		AddNibble(22, samples_per_tick);
+		/* Fast channel 2 */
+		AddNibble(14, samples_per_tick);
+		AddNibble(20, samples_per_tick);
+		AddNibble(12, samples_per_tick);
+		/* CRC */
+		AddNibble(21, samples_per_tick);
+		/* Pause pulse */
+		AddNibble(56, samples_per_tick);
+	}
+	else
+	{
+		/* Then, a valid SENT frame without a pause pulse at the end.
+		/* Calibration pulse */
+		AddNibble(56, samples_per_tick);
+		/* Status nibble */
+		AddNibble(12, samples_per_tick);
+		/* Fast channel 1 */
+		AddNibble(27, samples_per_tick);
+		AddNibble(17, samples_per_tick);
+		AddNibble(22, samples_per_tick);
+		/* Fast channel 2 */
+		AddNibble(14, samples_per_tick);
+		AddNibble(20, samples_per_tick);
+		AddNibble(12, samples_per_tick);
+		/* CRC */
+		AddNibble(21, samples_per_tick);
+		// /* Pause pulse */
+		// AddNibble(100, samples_per_tick);
+	}
 }
+
+
