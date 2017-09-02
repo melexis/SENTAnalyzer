@@ -33,8 +33,10 @@ protected: //vars
 	U32 mSampleRateHz;
 	U32 mStartOfStopBitOffset;
 	U32 mEndOfStopBitOffset;
+	U8 nibble_counter;
 
 	void addSENTFrame(U16 ticks, enum SENTNibbleType type, U64 start, U64 end);
+	bool isPulseSyncPulse(U16 number_of_ticks);
 };
 
 extern "C" ANALYZER_EXPORT const char* __cdecl GetAnalyzerName();

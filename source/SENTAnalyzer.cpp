@@ -10,7 +10,8 @@
 SENTAnalyzer::SENTAnalyzer()
 :	Analyzer2(),
 	mSettings( new SENTAnalyzerSettings() ),
-	mSimulationInitilized( false )
+	mSimulationInitilized( false ),
+	nibble_counter(0)
 {
 	SetAnalyzerSettings( mSettings.get() );
 }
@@ -47,6 +48,37 @@ void SENTAnalyzer::addSENTFrame(U16 data, enum SENTNibbleType type, U64 start, U
 	ReportProgress( frame.mEndingSampleInclusive );
 }
 
+/** Function for determining if the detected pulse is a sync pulse or not
+ *
+ *	First, the function checks if the detected pulse is 56 ticks wide.
+ *	This narrows the choice down to 2 options: sync pulse and pause pulse
+ *	(the other pulses are between 12 and 27 ticks wide)
+ *
+ *	Then, in order to determine whether it's a pause pulse or not, we check
+ *	whether we were expecting a pause pulse to begin with. If so, we take the
+ *	naive approach and assume it's a pause pulse. If not, we say it's a valid
+ *	sync pulse.
+ *
+ *  @retval 	true	The detected pulse is a sync pulse
+ *  @retval     false 	The detected pulse is not a sync pulse
+ */
+bool SENTAnalyzer::isPulseSyncPulse(U16 number_of_ticks)
+{
+	bool retval = false;
+	if(number_of_ticks == 56)
+	{
+		if (nibble_counter == PAUSE_PULSE_NUMBER)
+		{
+			retval = false;
+		}
+		else
+		{
+			retval = true;
+		}
+	}
+	return retval;
+}
+
 /** Main signal processing function
  *
  *  This function will actually attempt to decode the SENT frames.
@@ -60,7 +92,6 @@ void SENTAnalyzer::addSENTFrame(U16 data, enum SENTNibbleType type, U64 start, U
  *
  *  TODO: Serial messaging
  *  TODO: configurable fast channel nibble amount + optional pause pulse
- *  TODO: Investigate what happens if pause pulse is the same length as sync pulse (56 ticks)
  */
 void SENTAnalyzer::WorkerThread()
 {
@@ -78,7 +109,6 @@ void SENTAnalyzer::WorkerThread()
 	mSerial->AdvanceToNextEdge();
 
 	U64 starting_sample;
-	U8 nibble_counter = 0;
 
 	for( ; ; )
 	{
@@ -92,19 +122,16 @@ void SENTAnalyzer::WorkerThread()
 
 		/* Now, based on the difference in amount of samples between the current falling edge
 		   and the reference one, we can determine the amount of ticks that have passed */
-		float number_of_ticks = (mSerial->GetSampleNumber() - starting_sample) / theoretical_samples_per_ticks;
+		U16 number_of_ticks = (mSerial->GetSampleNumber() - starting_sample) / theoretical_samples_per_ticks;
 
 		/* Based on the amount of ticks and a nibble counter, we can attempt to determine
    		   what type of pulse was encountered */
 
-		/* First check if the number of ticks is more or less equal to 56.
-		   If so, this probably means that a sync pulse was detected
-		   TODO: this needs to be reviewed, as it could also be a pause pulse
-
+		/* First check if the detected pulse is a sync pulse
 		   As a sync pulse indicates the start of a new SENT frame, the previous
 		   Packet is closed and committed and a new Packet is started.
 		   */
-		if(number_of_ticks > 55 && number_of_ticks < 57)
+		if(isPulseSyncPulse(number_of_ticks))
 		{
 			mResults->CommitPacketAndStartNewPacket();
 			nibble_type = SyncPulse;

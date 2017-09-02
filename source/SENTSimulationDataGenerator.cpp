@@ -47,7 +47,7 @@ void SENTSimulationDataGenerator::CreateSerialByte()
 {
 	U32 samples_per_tick = mSimulationSampleRateHz * ((float)mSettings->tick_time_half_us / 2.0) / 1000000;
 
-	mSerialSimulationData.Advance( samples_per_tick * 10 );
+    /* First, a normal SENT frame */
 
 	/* Calibration pulse */
 	AddNibble(56, samples_per_tick);
@@ -65,4 +65,23 @@ void SENTSimulationDataGenerator::CreateSerialByte()
 	AddNibble(21, samples_per_tick);
 	/* Pause pulse */
 	AddNibble(100, samples_per_tick);
+
+	/* Then, another valid SENT frame, but with a pause pulse the size of a sync pulse. Muhahahahaa */
+
+	/* Calibration pulse */
+	AddNibble(56, samples_per_tick);
+	/* Status nibble */
+	AddNibble(12, samples_per_tick);
+	/* Fast channel 1 */
+	AddNibble(27, samples_per_tick);
+	AddNibble(17, samples_per_tick);
+	AddNibble(22, samples_per_tick);
+	/* Fast channel 2 */
+	AddNibble(14, samples_per_tick);
+	AddNibble(20, samples_per_tick);
+	AddNibble(12, samples_per_tick);
+	/* CRC */
+	AddNibble(21, samples_per_tick);
+	/* Pause pulse */
+	AddNibble(56, samples_per_tick);
 }
