@@ -168,7 +168,9 @@ void SENTAnalyzer::WorkerThread()
 			}
 		}
 		/* If none of the above conditions are met, the frame is marked as "unknown" */
-		else {} /* Do nothing. No valid frame was detected */
+		else {
+			nibble_counter = 0;
+		} /* Do nothing. No valid frame was detected */
 
 		nibble_counter++;
 

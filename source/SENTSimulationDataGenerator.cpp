@@ -3,6 +3,8 @@
 
 #include <AnalyzerHelpers.h>
 
+int fc_data [6] = {27, 17, 22, 14, 20, 12};
+
 SENTSimulationDataGenerator::SENTSimulationDataGenerator()
 {
 }
@@ -55,14 +57,10 @@ void SENTSimulationDataGenerator::CreateSerialByte()
 		AddNibble(56, samples_per_tick);
 		/* Status nibble */
 		AddNibble(12, samples_per_tick);
-		/* Fast channel 1 */
-		AddNibble(27, samples_per_tick);
-		AddNibble(17, samples_per_tick);
-		AddNibble(22, samples_per_tick);
-		/* Fast channel 2 */
-		AddNibble(14, samples_per_tick);
-		AddNibble(20, samples_per_tick);
-		AddNibble(12, samples_per_tick);
+		/* Fast channel nibbles */
+		for (U8 counter = 0; counter < mSettings->numberOfDataNibbles; counter++) {
+			AddNibble(fc_data[counter], samples_per_tick);
+		}
 		/* CRC */
 		AddNibble(21, samples_per_tick);
 		/* Pause pulse */
@@ -74,14 +72,10 @@ void SENTSimulationDataGenerator::CreateSerialByte()
 		AddNibble(56, samples_per_tick);
 		/* Status nibble */
 		AddNibble(12, samples_per_tick);
-		/* Fast channel 1 */
-		AddNibble(27, samples_per_tick);
-		AddNibble(17, samples_per_tick);
-		AddNibble(22, samples_per_tick);
-		/* Fast channel 2 */
-		AddNibble(14, samples_per_tick);
-		AddNibble(20, samples_per_tick);
-		AddNibble(12, samples_per_tick);
+		/* Fast channel nibbles */
+		for (U8 counter = 0; counter < mSettings->numberOfDataNibbles; counter++) {
+			AddNibble(fc_data[counter], samples_per_tick);
+		}
 		/* CRC */
 		AddNibble(21, samples_per_tick);
 		/* Pause pulse */
@@ -94,14 +88,10 @@ void SENTSimulationDataGenerator::CreateSerialByte()
 		AddNibble(56, samples_per_tick);
 		/* Status nibble */
 		AddNibble(12, samples_per_tick);
-		/* Fast channel 1 */
-		AddNibble(27, samples_per_tick);
-		AddNibble(17, samples_per_tick);
-		AddNibble(22, samples_per_tick);
-		/* Fast channel 2 */
-		AddNibble(14, samples_per_tick);
-		AddNibble(20, samples_per_tick);
-		AddNibble(12, samples_per_tick);
+		/* Fast channel nibbles */
+		for (U8 counter = 0; counter < mSettings->numberOfDataNibbles; counter++) {
+			AddNibble(fc_data[counter], samples_per_tick);
+		}
 		/* CRC */
 		AddNibble(21, samples_per_tick);
 		// /* Pause pulse */
