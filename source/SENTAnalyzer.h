@@ -34,6 +34,7 @@ protected: //vars
 	U32 mStartOfStopBitOffset;
 	U32 mEndOfStopBitOffset;
 	U8 nibble_counter;
+	U16 crc_nibble_number;
 
 	void addSENTFrame(U16 ticks, enum SENTNibbleType type, U64 start, U64 end);
 	bool isPulseSyncPulse(U16 number_of_ticks);

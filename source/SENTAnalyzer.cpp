@@ -3,9 +3,8 @@
 #include <AnalyzerChannelData.h>
 #include <math.h>
 
-#define STATUS_NIBBLE_NUMBER (1)
-#define CRC_NIBBLE_NUMBER (8)
-#define PAUSE_PULSE_NUMBER (9)
+#define STATUS_NIBBLE_NUMBER 	(1)
+#define PAUSE_PULSE_NUMBER 		(crc_nibble_number + 1)
 
 SENTAnalyzer::SENTAnalyzer()
 :	Analyzer2(),
@@ -26,6 +25,7 @@ void SENTAnalyzer::SetupResults()
 	mResults.reset( new SENTAnalyzerResults( this, mSettings.get() ) );
 	SetAnalyzerResults( mResults.get() );
 	mResults->AddChannelBubblesWillAppearOn( mSettings->mInputChannel );
+	crc_nibble_number = STATUS_NIBBLE_NUMBER + mSettings->numberOfDataNibbles + 1;
 }
 
 /** This function will create a new Frame with the data, type and timing info provided and commit it to the current packet
@@ -91,7 +91,6 @@ bool SENTAnalyzer::isPulseSyncPulse(U16 number_of_ticks)
  *    total amount of ticks minus 12.\
  *
  *  TODO: Serial messaging
- *  TODO: configurable fast channel nibble amount
  */
 void SENTAnalyzer::WorkerThread()
 {
@@ -155,13 +154,13 @@ void SENTAnalyzer::WorkerThread()
 				/* We extract the actual data by subtracting the number of ticks by 12 */
 				number_of_ticks = round(number_of_ticks) - 12;
 			}
-			else if (nibble_counter > STATUS_NIBBLE_NUMBER && nibble_counter < CRC_NIBBLE_NUMBER)
+			else if (nibble_counter > STATUS_NIBBLE_NUMBER && nibble_counter < crc_nibble_number)
 			{
 				nibble_type = FCNibble;
 				/* We extract the actual data by subtracting the number of ticks by 12 */
 				number_of_ticks = round(number_of_ticks) - 12;
 			}
-			else if(nibble_counter == CRC_NIBBLE_NUMBER)
+			else if(nibble_counter == crc_nibble_number)
 			{
 				nibble_type = CRCNibble;
 				/* We extract the actual data by subtracting the number of ticks by 12 */
