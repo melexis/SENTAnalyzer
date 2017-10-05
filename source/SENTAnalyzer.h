@@ -35,8 +35,10 @@ protected: //vars
 	U32 mEndOfStopBitOffset;
 	U8 nibble_counter;
 	U16 crc_nibble_number;
+	std::vector<Frame> framelist;
 
 	void addSENTFrame(U16 ticks, enum SENTNibbleType type, U64 start, U64 end);
+	void syncPulseDetected();
 	bool isPulseSyncPulse(U16 number_of_ticks);
 };
 

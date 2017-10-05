@@ -10,7 +10,8 @@ SENTAnalyzer::SENTAnalyzer()
 :	Analyzer2(),
 	mSettings( new SENTAnalyzerSettings() ),
 	mSimulationInitilized( false ),
-	nibble_counter(0)
+	nibble_counter(0),
+	framelist()
 {
 	SetAnalyzerSettings( mSettings.get() );
 }
@@ -43,9 +44,25 @@ void SENTAnalyzer::addSENTFrame(U16 data, enum SENTNibbleType type, U64 start, U
 	frame.mType = type;
 	frame.mStartingSampleInclusive = start;
 	frame.mEndingSampleInclusive = end;
-	mResults->AddFrame( frame );
-	mResults->CommitResults();
-	ReportProgress( frame.mEndingSampleInclusive );
+	framelist.push_back(frame);
+}
+
+void SENTAnalyzer::syncPulseDetected()
+{
+	if(framelist.size() == crc_nibble_number + 1)
+	{
+		for(std::vector<Frame>::iterator it = framelist.begin(); it != framelist.end(); it++) {
+			mResults->AddFrame( *it );
+			mResults->CommitResults();
+			ReportProgress( it->mEndingSampleInclusive );
+		}
+		mResults->CommitPacketAndStartNewPacket();
+	}
+	else
+	{
+		mResults->CancelPacketAndStartNewPacket();
+	}
+	framelist.clear();
 }
 
 /** Function for determining if the detected pulse is a sync pulse or not
@@ -132,7 +149,7 @@ void SENTAnalyzer::WorkerThread()
 		   */
 		if(isPulseSyncPulse(number_of_ticks))
 		{
-			mResults->CommitPacketAndStartNewPacket();
+			syncPulseDetected();
 			nibble_type = SyncPulse;
 			nibble_counter = 0;
 		}
