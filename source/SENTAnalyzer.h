@@ -39,6 +39,7 @@ protected: //vars
 
 	void addSENTFrame(U16 ticks, enum SENTNibbleType type, U64 start, U64 end);
 	void syncPulseDetected();
+	U8 CalculateCRC();
 	bool isPulseSyncPulse(U16 number_of_ticks);
 };
 

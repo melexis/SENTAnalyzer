@@ -29,6 +29,25 @@ void SENTAnalyzer::SetupResults()
 	crc_nibble_number = STATUS_NIBBLE_NUMBER + mSettings->numberOfDataNibbles + 1;
 }
 
+/** Function for calculation the SENT CRC4
+ *
+ *  @returns 	U8	the calculated CRC4 on the data of the previous SENT frame.
+ */
+U8 SENTAnalyzer::CalculateCRC()
+{
+	U8 crc4_table [16] = {0, 13, 7, 10, 14, 3, 9, 4, 1, 12, 6, 11, 15, 2, 8, 5};
+	U8 CheckSum16 = 5;
+
+	/* We increment the start pointer by 2 to skip sync and status nibbles.
+	 * In the end condition we decrement the end pointer by 1 to omit the CRC nibble */
+	for(std::vector<Frame>::iterator it = framelist.begin() + 2; it != framelist.end() - 1; it++)
+	{
+		CheckSum16 = it->mData1 ^ crc4_table[CheckSum16];
+	}
+	CheckSum16 = 0 ^ crc4_table[CheckSum16];
+	return CheckSum16;
+}
+
 /** This function will create a new Frame with the data, type and timing info provided and commit it to the current packet
  *
  *  @param [in] 	data 	The data to be stored in the frame
@@ -47,16 +66,33 @@ void SENTAnalyzer::addSENTFrame(U16 data, enum SENTNibbleType type, U64 start, U
 	framelist.push_back(frame);
 }
 
+/** Callback function for detection of sync pulse
+ *
+ *  This function will do some sanity checks on the data gathered during the
+ *  last SENT frame. It will check
+ *
+ *  - The amount of nibbles
+ *  - The CRC
+ *
+ *  If any of these checks fail, the SENT frame is dropped.
+ */
 void SENTAnalyzer::syncPulseDetected()
 {
 	if(framelist.size() == crc_nibble_number + 1)
 	{
-		for(std::vector<Frame>::iterator it = framelist.begin(); it != framelist.end(); it++) {
-			mResults->AddFrame( *it );
-			mResults->CommitResults();
-			ReportProgress( it->mEndingSampleInclusive );
+		if (framelist.back().mData1 == CalculateCRC())
+		{
+			for(std::vector<Frame>::iterator it = framelist.begin(); it != framelist.end(); it++) {
+				mResults->AddFrame( *it );
+				mResults->CommitResults();
+				ReportProgress( it->mEndingSampleInclusive );
+			}
+			mResults->CommitPacketAndStartNewPacket();
 		}
-		mResults->CommitPacketAndStartNewPacket();
+		else
+		{
+			mResults->CancelPacketAndStartNewPacket();
+		}
 	}
 	else
 	{
