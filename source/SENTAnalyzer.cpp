@@ -55,7 +55,7 @@ U8 SENTAnalyzer::CalculateCRC()
  *  @param [in] 	start 	The sample number of the start of the frame
  *  @param [in] 	end 	The sample number of the end of the frame
  */
-void SENTAnalyzer::addSENTFrame(U16 data, enum SENTNibbleType type, U64 start, U64 end)
+void SENTAnalyzer::addSENTPulse(U16 data, enum SENTNibbleType type, U64 start, U64 end)
 {
 	Frame frame;
 	frame.mData1 = data;
@@ -228,7 +228,7 @@ void SENTAnalyzer::WorkerThread()
 		nibble_counter++;
 
 		/* Commit the frame to the database and to the current packet */
-		addSENTFrame(number_of_ticks, nibble_type, starting_sample + 1,	 mSerial->GetSampleNumber());
+		addSENTPulse(number_of_ticks, nibble_type, starting_sample + 1,	 mSerial->GetSampleNumber());
 	}
 }
 
