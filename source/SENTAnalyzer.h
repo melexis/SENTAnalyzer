@@ -35,6 +35,7 @@ protected: //vars
 	U32 mEndOfStopBitOffset;
 	U8 nibble_counter;
 	U16 crc_nibble_number;
+	U16 number_of_nibbles;
 	std::vector<Frame> framelist;
 
 	void syncPulseDetected();

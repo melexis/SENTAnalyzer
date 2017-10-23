@@ -27,6 +27,14 @@ void SENTAnalyzer::SetupResults()
 	SetAnalyzerResults( mResults.get() );
 	mResults->AddChannelBubblesWillAppearOn( mSettings->mInputChannel );
 	crc_nibble_number = STATUS_NIBBLE_NUMBER + mSettings->numberOfDataNibbles + 1;
+	if (mSettings->pausePulseEnabled)
+	{
+		number_of_nibbles = PAUSE_PULSE_NUMBER + 1;
+	}
+	else
+	{
+		number_of_nibbles = crc_nibble_number + 1;
+	}
 }
 
 /** Function for calculation the SENT CRC4
@@ -78,9 +86,9 @@ void SENTAnalyzer::addSENTPulse(U16 data, enum SENTNibbleType type, U64 start, U
  */
 void SENTAnalyzer::syncPulseDetected()
 {
-	if(framelist.size() == crc_nibble_number + 1)
+	if(framelist.size() == number_of_nibbles)
 	{
-		if (framelist.back().mData1 == CalculateCRC())
+		if (framelist.at(crc_nibble_number).mData1 == CalculateCRC())
 		{
 			for(std::vector<Frame>::iterator it = framelist.begin(); it != framelist.end(); it++) {
 				mResults->AddFrame( *it );
