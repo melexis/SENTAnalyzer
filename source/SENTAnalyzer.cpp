@@ -48,7 +48,7 @@ U8 SENTAnalyzer::CalculateCRC()
 
 	/* We increment the start pointer by 2 to skip sync and status nibbles.
 	 * In the end condition we decrement the end pointer by 1 to omit the CRC nibble */
-	for(std::vector<Frame>::iterator it = framelist.begin() + 2; it != framelist.end() - 1; it++)
+	for(std::vector<Frame>::iterator it = framelist.begin() + 2; it != framelist.end() - (number_of_nibbles - crc_nibble_number); it++)
 	{
 		CheckSum16 = it->mData1 ^ crc4_table[CheckSum16];
 	}
