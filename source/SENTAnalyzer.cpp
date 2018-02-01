@@ -127,7 +127,7 @@ bool SENTAnalyzer::isPulseSyncPulse(U16 number_of_ticks)
 {
 	bool retval = false;
 	/* Sync pulse should be 56 ticks. Given a 20% margin, it should fall in range [45:67] */
-	if(number_of_ticks >= 45 && number_of_ticks =< 67)
+	if(number_of_ticks >= 45 && number_of_ticks <= 67)
 	{
 		if ((mSettings->pausePulseEnabled) && (nibble_counter == PAUSE_PULSE_NUMBER))
 		{
