@@ -74,6 +74,20 @@ void SENTAnalyzer::addSENTPulse(U16 data, enum SENTNibbleType type, U64 start, U
 	framelist.push_back(frame);
 }
 
+void SENTAnalyzer::addErrorFrame(U16 data, U64 start, U64 end)
+{
+	Frame frame;
+	frame.mData1 = data;
+	frame.mFlags = 0;
+	frame.mType = Error;
+	frame.mStartingSampleInclusive = start;
+	frame.mEndingSampleInclusive = end;
+
+	mResults->AddFrame(frame);
+	mResults->CommitResults();
+	ReportProgress(frame.mEndingSampleInclusive);
+}
+
 /** Callback function for detection of sync pulse
  *
  *  This function will do some sanity checks on the data gathered during the
@@ -104,7 +118,8 @@ void SENTAnalyzer::syncPulseDetected()
 	}
 	else
 	{
-		mResults->CancelPacketAndStartNewPacket();
+		addErrorFrame(framelist.size(), framelist.begin()->mStartingSampleInclusive, framelist.begin()->mEndingSampleInclusive);
+		mResults->CommitPacketAndStartNewPacket();
 	}
 	framelist.clear();
 }

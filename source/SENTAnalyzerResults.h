@@ -6,7 +6,7 @@
 class SENTAnalyzer;
 class SENTAnalyzerSettings;
 
-enum SENTNibbleType { SyncPulse, StatusNibble, FCNibble, CRCNibble, PausePulse, Unknown};
+enum SENTNibbleType { SyncPulse, StatusNibble, FCNibble, CRCNibble, PausePulse, Unknown, Error};
 
 class SENTAnalyzerResults : public AnalyzerResults
 {
