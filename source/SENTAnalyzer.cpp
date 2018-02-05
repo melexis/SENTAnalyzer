@@ -11,7 +11,8 @@ SENTAnalyzer::SENTAnalyzer()
 	mSettings( new SENTAnalyzerSettings() ),
 	mSimulationInitilized( false ),
 	nibble_counter(0),
-	framelist()
+	framelist(),
+	corrected_samples_per_tick(0)
 {
 	SetAnalyzerSettings( mSettings.get() );
 }
@@ -124,6 +125,19 @@ void SENTAnalyzer::syncPulseDetected()
 	framelist.clear();
 }
 
+/** Function for correcting the tick time
+ *
+ *  This function should be called whenever a sync pulse is detected (given the specified clock tolerances)
+ *  Then, based on the amount of samples during that period, the amount of samples per tick is recalculated
+ *  by dividing this number by the amount of ticks per sync pulse (56).
+ *
+ *  @param[in] 	number_of_samples	The amount of samples taken during the sync pulse period
+ */
+void SENTAnalyzer::correctTickTime(U32 number_of_samples)
+{
+	corrected_samples_per_tick = round(number_of_samples / 56.0);
+}
+
 /** Function for determining if the detected pulse is a sync pulse or not
  *
  *	First, the function checks if the detected pulse is 56 ticks wide.
@@ -176,6 +190,10 @@ void SENTAnalyzer::WorkerThread()
 	/* Based on the configured tick time and the sampling rate, determine the amount of samples per tick */
 	U32 theoretical_samples_per_ticks = mSampleRateHz * (mSettings->tick_time_half_us / 2.0) / 1000000;
 
+	/* This is initialized to the theoretical samples per tick, and is adjusted on every
+	 * received sync pulse */
+	corrected_samples_per_tick = theoretical_samples_per_ticks;
+
 	/* Request the channel we are using for the analysis */
 	mSerial = GetAnalyzerChannelData( mSettings->mInputChannel );
 
@@ -196,9 +214,12 @@ void SENTAnalyzer::WorkerThread()
 		mSerial->AdvanceToNextEdge();
 		mSerial->AdvanceToNextEdge();
 
+		/* Calculate the number of samples in this period */
+		U32 number_of_samples = mSerial->GetSampleNumber() - starting_sample;
 		/* Now, based on the difference in amount of samples between the current falling edge
 		   and the reference one, we can determine the amount of ticks that have passed */
-		U16 number_of_ticks = (mSerial->GetSampleNumber() - starting_sample) / theoretical_samples_per_ticks;
+		U16 theoretical_number_of_ticks = round((float)number_of_samples / theoretical_samples_per_ticks);
+		U16 corrected_number_of_ticks = round((float)number_of_samples / corrected_samples_per_tick);
 
 		/* Based on the amount of ticks and a nibble counter, we can attempt to determine
    		   what type of pulse was encountered */
@@ -207,10 +228,14 @@ void SENTAnalyzer::WorkerThread()
 		   As a sync pulse indicates the start of a new SENT frame, the previous
 		   Packet is closed and committed and a new Packet is started.
 		   */
-		if(isPulseSyncPulse(number_of_ticks))
+		if(isPulseSyncPulse(theoretical_number_of_ticks))
 		{
+			/* If it's a valid sync pulse, calculate the corrected tick time */
+			correctTickTime(number_of_samples);
+			/* Then close the previous frame and check if it was valid */
 			syncPulseDetected();
 			nibble_type = SyncPulse;
+			corrected_number_of_ticks = 56;
 			nibble_counter = 0;
 		}
 		/* Then we check if the nibble counter indicates that we're expecting a pause pulse.
@@ -223,25 +248,25 @@ void SENTAnalyzer::WorkerThread()
 		/* If not a pause pulse of sync pulse, it must be a data-carrying nibble.
 		   The size range for these pulses is limited, so we check that first
 		   Then, we check the nibble counter to see which type of nibble is expected */
-		else if (number_of_ticks > 11 && number_of_ticks < 28)
+		else if (corrected_number_of_ticks > 11 && corrected_number_of_ticks < 28)
 		{
 			if(nibble_counter == STATUS_NIBBLE_NUMBER)
 			{
 				nibble_type = StatusNibble;
 				/* We extract the actual data by subtracting the number of ticks by 12 */
-				number_of_ticks = round(number_of_ticks) - 12;
+				corrected_number_of_ticks -= 12;
 			}
 			else if (nibble_counter > STATUS_NIBBLE_NUMBER && nibble_counter < crc_nibble_number)
 			{
 				nibble_type = FCNibble;
 				/* We extract the actual data by subtracting the number of ticks by 12 */
-				number_of_ticks = round(number_of_ticks) - 12;
+				corrected_number_of_ticks -= 12;
 			}
 			else if(nibble_counter == crc_nibble_number)
 			{
 				nibble_type = CRCNibble;
 				/* We extract the actual data by subtracting the number of ticks by 12 */
-				number_of_ticks = round(number_of_ticks) - 12;
+				corrected_number_of_ticks -= 12;
 			}
 		}
 		/* If none of the above conditions are met, the frame is marked as "unknown" */
@@ -252,7 +277,7 @@ void SENTAnalyzer::WorkerThread()
 		nibble_counter++;
 
 		/* Commit the frame to the database and to the current packet */
-		addSENTPulse(number_of_ticks, nibble_type, starting_sample + 1,	 mSerial->GetSampleNumber());
+		addSENTPulse(corrected_number_of_ticks, nibble_type, starting_sample + 1, mSerial->GetSampleNumber());
 	}
 }
 
