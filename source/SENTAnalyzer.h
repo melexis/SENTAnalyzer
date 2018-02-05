@@ -37,8 +37,10 @@ protected: //vars
 	U16 crc_nibble_number;
 	U16 number_of_nibbles;
 	std::vector<Frame> framelist;
+	U32 corrected_samples_per_tick;
 
 	void syncPulseDetected();
+	void correctTickTime(U32 number_of_samples);
 	U8 CalculateCRC();
 	bool isPulseSyncPulse(U16 number_of_ticks);
 private:
