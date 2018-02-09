@@ -20,12 +20,14 @@ public:
 	U32 tick_time_half_us;
 	bool pausePulseEnabled;
 	U32 numberOfDataNibbles;
+	bool legacyCRC;
 
 protected:
 	std::auto_ptr< AnalyzerSettingInterfaceChannel >	mInputChannelInterface;
 	std::auto_ptr< AnalyzerSettingInterfaceInteger >	tickTimeInterface;
 	std::auto_ptr< AnalyzerSettingInterfaceBool >		pausePulseInterface;
 	std::auto_ptr< AnalyzerSettingInterfaceInteger >	dataNibblesInterface;
+	std::auto_ptr< AnalyzerSettingInterfaceBool >		legacyCRCInterface;
 };
 
 #endif //SENT_ANALYZER_SETTINGS

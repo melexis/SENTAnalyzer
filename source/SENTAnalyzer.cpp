@@ -53,7 +53,9 @@ U8 SENTAnalyzer::CalculateCRC()
 	{
 		CheckSum16 = it->mData1 ^ crc4_table[CheckSum16];
 	}
-	CheckSum16 = 0 ^ crc4_table[CheckSum16];
+	if(!mSettings->legacyCRC) {
+		CheckSum16 = 0 ^ crc4_table[CheckSum16];
+	}
 	return CheckSum16;
 }
 

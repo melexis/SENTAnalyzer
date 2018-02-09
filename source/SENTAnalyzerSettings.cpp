@@ -6,6 +6,7 @@ SENTAnalyzerSettings::SENTAnalyzerSettings()
 :	mInputChannel( UNDEFINED_CHANNEL ),
 	tick_time_half_us(3),
 	pausePulseEnabled(true),
+	legacyCRC(false),
 	numberOfDataNibbles(6)
 {
 	mInputChannelInterface.reset( new AnalyzerSettingInterfaceChannel() );
@@ -28,10 +29,15 @@ SENTAnalyzerSettings::SENTAnalyzerSettings()
 	dataNibblesInterface->SetMin( 0);
 	dataNibblesInterface->SetInteger( numberOfDataNibbles );
 
+	legacyCRCInterface.reset( new AnalyzerSettingInterfaceBool() );
+	legacyCRCInterface->SetTitleAndTooltip( "Legacy CRC",  "Specify whether the legacy crc calculation should be used or not" );
+	legacyCRCInterface->SetValue(legacyCRC);
+
 	AddInterface( mInputChannelInterface.get() );
 	AddInterface( tickTimeInterface.get() );
 	AddInterface( pausePulseInterface.get() );
 	AddInterface( dataNibblesInterface.get() );
+	AddInterface( legacyCRCInterface.get() );
 
 	AddExportOption( 0, "Export as text/csv file" );
 	AddExportExtension( 0, "text", "txt" );
@@ -51,6 +57,7 @@ bool SENTAnalyzerSettings::SetSettingsFromInterfaces()
 	tick_time_half_us = tickTimeInterface->GetInteger();
 	pausePulseEnabled = pausePulseInterface->GetValue();
 	numberOfDataNibbles = dataNibblesInterface->GetInteger();
+	legacyCRC = legacyCRCInterface->GetValue();
 
 	ClearChannels();
 	AddChannel( mInputChannel, "SENT (SAE J2716)", true );
@@ -64,6 +71,7 @@ void SENTAnalyzerSettings::UpdateInterfacesFromSettings()
 	tickTimeInterface->SetInteger(tick_time_half_us);
 	pausePulseInterface->SetValue(pausePulseEnabled);
 	dataNibblesInterface->SetInteger(numberOfDataNibbles);
+	legacyCRCInterface->SetValue(legacyCRC);
 }
 
 void SENTAnalyzerSettings::LoadSettings( const char* settings )
@@ -75,6 +83,7 @@ void SENTAnalyzerSettings::LoadSettings( const char* settings )
 	text_archive >> tick_time_half_us;
 	text_archive >> pausePulseEnabled;
 	text_archive >> numberOfDataNibbles;
+	text_archive >> legacyCRC;
 
 	ClearChannels();
 	AddChannel( mInputChannel, "SENT (SAE J2716)", true );
@@ -90,6 +99,7 @@ const char* SENTAnalyzerSettings::SaveSettings()
 	text_archive << tick_time_half_us;
 	text_archive << pausePulseEnabled;
 	text_archive << numberOfDataNibbles;
+	text_archive << legacyCRC;
 
 	return SetReturnString( text_archive.GetString() );
 }
