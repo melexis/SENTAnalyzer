@@ -30,6 +30,7 @@ void SENTAnalyzerResults::InitializeTypeMap(void)
 	TypeMap[PausePulse] = "PAUSE_PULSE";
 	TypeMap[Unknown] = "UNKNOWN";
 	TypeMap[Error] = "Error";
+	TypeMap[CRCError] = "CRC Error";
 }
 
 std::string SENTAnalyzerResults::FrameToString(Frame frame, DisplayBase display_base)
@@ -64,6 +65,10 @@ std::string SENTAnalyzerResults::FrameToString(Frame frame, DisplayBase display_
 		case Error:
 			AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 4, number_str, 128 );
 			ss << "Error. Number of nibbles detected: " << number_str;
+			break;
+		case CRCError:
+			AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 4, number_str, 128 );
+			ss << "Crc error. Nibble content: " << number_str;
 			break;
 	}
 	return ss.str();

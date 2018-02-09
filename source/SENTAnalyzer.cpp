@@ -114,7 +114,13 @@ void SENTAnalyzer::syncPulseDetected()
 		}
 		else
 		{
-			mResults->CancelPacketAndStartNewPacket();
+			for(std::vector<Frame>::iterator it = framelist.begin(); it != framelist.end(); it++) {
+				it->mType = CRCError;
+				mResults->AddFrame( *it );
+				mResults->CommitResults();
+				ReportProgress( it->mEndingSampleInclusive );
+			}
+			mResults->CommitPacketAndStartNewPacket();
 		}
 	}
 	else
