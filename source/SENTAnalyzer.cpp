@@ -119,10 +119,14 @@ void SENTAnalyzer::syncPulseDetected()
 			mResults->CancelPacketAndStartNewPacket();
 		}
 	}
-	else
+	else if( framelist.size() > 0 )
 	{
 		addErrorFrame(framelist.size(), framelist.begin()->mStartingSampleInclusive, framelist.begin()->mEndingSampleInclusive);
 		mResults->CommitPacketAndStartNewPacket();
+	}
+	else /* Framelist is empty. This occurs when the first pulse is already a sync pulse */
+	{
+		mResults->CancelPacketAndStartNewPacket();
 	}
 	framelist.clear();
 }
@@ -205,6 +209,9 @@ void SENTAnalyzer::WorkerThread()
 	mSerial->AdvanceToNextEdge();
 
 	U64 starting_sample;
+
+	framelist = std::vector<Frame>();
+	nibble_counter = 0;
 
 	for( ; ; )
 	{
