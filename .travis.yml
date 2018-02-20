@@ -1,0 +1,5 @@
+language: cpp
+compiler: gcc
+install: true
+
+script: python build_analyzer.py
