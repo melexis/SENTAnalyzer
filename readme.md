@@ -7,6 +7,7 @@ This plugin allows decoding SENT frames of up to 6 data nibbles and allows expor
 - Builtin slow message decoding
 - Automatic detection of tick time
 - SPC support
+- Aggregation of individual nibble data into into FC1/FC2 data --> Loads of different configurations, could get complex 
 
 ## Building the plugin:
 
@@ -48,6 +49,47 @@ The plugin can be configured in a number of ways to support various SENT configu
 - Number of data nibbles: Well, the number of data nibbles
 - Legacy CRC: Select whether the CRC algorithm used is the legacy algorithm or the newer, more secure one.
 
- 
+## Export format:
 
+The plugin supports exporting the SENT data in csv format for further processing (slow message) or for automation purposes.
+
+At the moment, the output format looks like this:
+
+```
+0.000656750000000, 0x38, SYNC_PULSE
+0.000740750000000, 0x00, STATUS_NIBBLE
+0.000758750000000, 0x0F, FC_NIBBLE
+0.000799250000000, 0x05, FC_NIBBLE
+0.000824750000000, 0x0A, FC_NIBBLE
+0.000857750000000, 0x02, FC_NIBBLE
+0.000878750000000, 0x08, FC_NIBBLE
+0.000908750000000, 0x00, FC_NIBBLE
+0.000926750000000, 0x09, CRC_NIBBLE
+0.000958250000000, 0x64, PAUSE_PULSE
+------, ------, -----
+0.001108250000000, 0x38, SYNC_PULSE
+0.001192250000000, 0x00, STATUS_NIBBLE
+0.001210250000000, 0x0F, FC_NIBBLE
+0.001250750000000, 0x05, FC_NIBBLE
+0.001276250000000, 0x0A, FC_NIBBLE
+0.001309250000000, 0x02, FC_NIBBLE
+0.001330250000000, 0x08, FC_NIBBLE
+0.001360250000000, 0x00, FC_NIBBLE
+0.001378250000000, 0x09, CRC_NIBBLE
+0.001409750000000, 0x38, PAUSE_PULSE
+------, ------, -----
+0.001493750000000, 0x38, SYNC_PULSE
+0.001577750000000, 0x00, STATUS_NIBBLE
+0.001595750000000, 0x0F, FC_NIBBLE
+0.001636250000000, 0x05, FC_NIBBLE
+0.001661750000000, 0x0A, FC_NIBBLE
+0.001694750000000, 0x02, FC_NIBBLE
+0.001715750000000, 0x08, FC_NIBBLE
+0.001745750000000, 0x00, FC_NIBBLE
+0.001763750000000, 0x09, CRC_NIBBLE
+0.001795250000000, 0x64, PAUSE_PULSE
+```
+
+Note that more formats will likely be added, as the format shown above does not allow for the fastest data processing. We will likely add a format that groups the 
+for a single SENT frame on a single line (with a timestamp for the beginning of the SENT message)
 
