@@ -1,5 +1,13 @@
 # SENT (SAE J2716) Analyzer for Saleae USB logic analyzer
 
+This plugin allows decoding SENT frames of up to 6 data nibbles and allows exporting the nibble data for further postprocessing
+
+## Wishlist:
+
+- Builtin slow message decoding
+- Automatic detection of tick time
+- SPC support
+
 ## Building the plugin:
 
 ### Windows:
@@ -20,3 +28,10 @@ python build_analyzer.py
 ## Installing the plugin:
 
 Copy the .dll/.so over to the Saleae Logic analyzer folder. You can either copy it to the "Analyzers" folder in the Saleae Logic installation directory, or specify a custom path under "Preferences --> Developer"
+
+## Testing the installation:
+
+When installed, the plugin can be tested (in the absence of an actual SENT signal) by loading the analyzer (it should show up in the list now) and hitting the "Start simulation" button. Note that for this to work, the Saleae Logic analyzer should not be connected to the computer.
+
+![sent_simulation_screenshot.PNG](docs/images/sent_simulation_screenshot.PNG "SENT simulation screenshot")
+
