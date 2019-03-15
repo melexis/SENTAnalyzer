@@ -1,7 +1,22 @@
 # SENT (SAE J2716) Analyzer for Saleae USB logic analyzer
 
-To build on Windows, open the visual studio project in the Visual Studio folder, and build. The Visual Studio solution has configurations for 32 bit and 64 bit builds. You will likely need to switch the configuration to 64 bit and build that in order to get the analyzer to load in the Windows software.
+## Building the plugin:
 
-To build on Linux or OSX, run the build_analyzer.py script. The compiled libraries can be found in the newly created debug and release folders.
+### Windows:
 
-	python build_analyzer.py
+- Open "Visual Studio/SENTAnalyzer.sln" to open project in visual studio
+- Depending on the version used, vs might ask to upgrade the project files
+- Default build configuration is for "win32". You likely need to change this to "x64"
+- Build project. Dll file is generated in "Visual Studio\x64\Release\SENTAnalyzer.dll" 
+
+### Linux/OSX:
+
+run the build_analyzer.py script. The compiled libraries can be found in the newly created debug and release folders.
+
+```
+python build_analyzer.py
+```
+
+## Installing the plugin:
+
+Copy the .dll/.so over to the Saleae Logic analyzer folder. You can either copy it to the "Analyzers" folder in the Saleae Logic installation directory, or specify a custom path under "Preferences --> Developer"
