@@ -35,3 +35,19 @@ When installed, the plugin can be tested (in the absence of an actual SENT signa
 
 ![sent_simulation_screenshot.PNG](docs/images/sent_simulation_screenshot.PNG "SENT simulation screenshot")
 
+## Configuring the plugin:
+
+The plugin can be configured in a number of ways to support various SENT configurations.
+
+![sent_analyzer_settings.PNG](docs/images/sent_analyzer_settings.PNG "Analyzer configuration window")
+
+- Serial: Used to select which input channel contains the SENT signal
+- tick time (half us): The tick time of the SENT signal. Due to some limitations of the saleae plugin framework, decimal numbers are not supported. #
+  Therefore, the unit used here is "half us", i.e. for a 1.5us tick time the value entered here should be 3
+- Pause pulse: Select whether or not the SENT frame contains a pause pulse or not
+- Number of data nibbles: Well, the number of data nibbles
+- Legacy CRC: Select whether the CRC algorithm used is the legacy algorithm or the newer, more secure one.
+
+ 
+
+
