@@ -10,20 +10,52 @@ using namespace std;
 class LOGICAPI AnalyzerSettingInterfaceDouble : public AnalyzerSettingInterfaceText
 {
 public:
-	AnalyzerSettingInterfaceDouble(void) {}
+	AnalyzerSettingInterfaceDouble(void) {
+		min_value = DBL_MIN;
+		max_value = DBL_MAX;
+	}
 	virtual ~AnalyzerSettingInterfaceDouble() {}
 
-	double GetDouble() 
+	double GetDouble(bool* error, const char ** error_message)
 	{
-		double retval;
-		const char* parent_text = AnalyzerSettingInterfaceText::GetText(); 
-		retval = stod(parent_text);
+		*error = true;
+		*error_message = "Some error message";
+		double retval = 0.0;
+		const char* parent_text = AnalyzerSettingInterfaceText::GetText();
+		try {
+			retval = stod(parent_text);
+		}
+		catch (...) {
+			*error_message = "Not a valid decimal (double) type argument.";
+			*error = false;
+			return 0.0;
+		}
+
+		if (retval < min_value) {
+			*error_message = "Input value too small";
+			*error = false;
+		} else if (retval > max_value) {
+			*error_message = "Input value too big";
+			*error = false;
+		}
 		return retval;
 	}
+
 	void SetDouble(double data)
 	{
 		AnalyzerSettingInterfaceText::SetText(to_string(data).c_str());
 	}
+	void setMax(double max)
+	{
+		max_value = max;
+	}
+	void setMin(double min)
+	{
+		min_value = min;
+	}
+private:
+	double max_value;
+	double min_value;
 };
 
 class SENTAnalyzerSettings : public AnalyzerSettings

@@ -308,7 +308,7 @@ U32 SENTAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_s
 
 U32 SENTAnalyzer::GetMinimumSampleRateHz()
 {
-	return 2000000 / (mSettings->tick_time / 2.0);
+	return 2000000 / mSettings->tick_time;
 }
 
 const char* SENTAnalyzer::GetAnalyzerName() const
