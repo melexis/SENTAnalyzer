@@ -194,7 +194,7 @@ void SENTAnalyzer::WorkerThread()
 	mSampleRateHz = GetSampleRate();
 
 	/* Based on the configured tick time and the sampling rate, determine the amount of samples per tick */
-	U32 theoretical_samples_per_ticks = mSampleRateHz * (mSettings->tick_time_half_us / 2.0) / 1000000;
+	U32 theoretical_samples_per_ticks = mSampleRateHz * mSettings->tick_time / 1000000;
 
 	/* This is initialized to the theoretical samples per tick, and is adjusted on every
 	 * received sync pulse */
@@ -308,7 +308,7 @@ U32 SENTAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_s
 
 U32 SENTAnalyzer::GetMinimumSampleRateHz()
 {
-	return 2000000 / (mSettings->tick_time_half_us / 2.0);
+	return 2000000 / (mSettings->tick_time / 2.0);
 }
 
 const char* SENTAnalyzer::GetAnalyzerName() const
