@@ -11,6 +11,8 @@ This plugin allows decoding SENT frames of up to 6 data nibbles and allows expor
 
 ## Building the plugin:
 
+First off, make sure to update/populate the submodules used in the project. These submodules contain the Saleae-provided libraries needed to succesfully build the plugin. In case you don't use the git interface (you downloaded the project as a zip), you need to follow the AnalyzerSDK link in github, download that project separately, and extract it in the folder where the SENTAnalyzer files are stored
+
 ### Windows:
 
 - Open "Visual Studio/SENTAnalyzer.sln" to open project in visual studio
