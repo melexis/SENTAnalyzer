@@ -77,12 +77,12 @@ void SENTAnalyzer::addSENTPulse(U16 data, enum SENTNibbleType type, U64 start, U
 	framelist.push_back(frame);
 }
 
-void SENTAnalyzer::addErrorFrame(U16 data, U64 start, U64 end, SENTNibbleType error_type)
+void SENTAnalyzer::addErrorFrame(U16 data, U64 start, U64 end, SENTErrorType error_type)
 {
 	Frame frame;
 	frame.mData1 = data;
-	frame.mFlags = 0;
-	frame.mType = error_type;
+	frame.mFlags = DISPLAY_AS_ERROR_FLAG | (1 << error_type);
+	frame.mType = Error;
 	frame.mStartingSampleInclusive = start;
 	frame.mEndingSampleInclusive = end;
 
@@ -106,25 +106,21 @@ void SENTAnalyzer::syncPulseDetected()
 	if(framelist.size() == number_of_nibbles)
 	{
 		U8 expected_crc = CalculateCRC();
-		if (framelist.at(crc_nibble_number).mData1 == expected_crc)
-		{
-			for(std::vector<Frame>::iterator it = framelist.begin(); it != framelist.end(); it++) {
+		bool crc_correct = (framelist.at(crc_nibble_number).mData1 == expected_crc);
+		for(std::vector<Frame>::iterator it = framelist.begin(); it != framelist.end(); it++) {
+			if(!crc_correct && (it->mType == CRCNibble)) {
+				addErrorFrame(expected_crc, it->mStartingSampleInclusive, it->mEndingSampleInclusive, CrcError);
+			} else {
 				mResults->AddFrame( *it );
 				mResults->CommitResults();
 				ReportProgress( it->mEndingSampleInclusive );
 			}
-			mResults->CommitPacketAndStartNewPacket();
 		}
-		else
-		{
-			mResults->CancelPacketAndStartNewPacket();
-			addErrorFrame(expected_crc, framelist.begin()->mStartingSampleInclusive, framelist.begin()->mEndingSampleInclusive, CRCError);
-			mResults->CommitPacketAndStartNewPacket();
-		}
+		mResults->CommitPacketAndStartNewPacket();
 	}
 	else if( framelist.size() > 0 )
 	{
-		addErrorFrame(framelist.size(), framelist.begin()->mStartingSampleInclusive, framelist.begin()->mEndingSampleInclusive, Error);
+		addErrorFrame(framelist.size(), framelist.begin()->mStartingSampleInclusive, framelist.begin()->mEndingSampleInclusive, NibbleNumberError);
 		mResults->CommitPacketAndStartNewPacket();
 	}
 	else /* Framelist is empty. This occurs when the first pulse is already a sync pulse */

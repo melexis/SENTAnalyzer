@@ -45,7 +45,7 @@ protected: //vars
 	bool isPulseSyncPulse(U16 number_of_ticks);
 private:
 	void addSENTPulse(U16 ticks, enum SENTNibbleType type, U64 start, U64 end);
-	void addErrorFrame(U16 data, U64 start, U64 end, SENTNibbleType error_type);
+	void addErrorFrame(U16 data, U64 start, U64 end, SENTErrorType error_type);
 };
 
 extern "C" ANALYZER_EXPORT const char* __cdecl GetAnalyzerName();
