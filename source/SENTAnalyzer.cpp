@@ -77,12 +77,12 @@ void SENTAnalyzer::addSENTPulse(U16 data, enum SENTNibbleType type, U64 start, U
 	framelist.push_back(frame);
 }
 
-void SENTAnalyzer::addErrorFrame(U16 data, U64 start, U64 end)
+void SENTAnalyzer::addErrorFrame(U16 data, U64 start, U64 end, SENTNibbleType error_type)
 {
 	Frame frame;
 	frame.mData1 = data;
 	frame.mFlags = 0;
-	frame.mType = Error;
+	frame.mType = error_type;
 	frame.mStartingSampleInclusive = start;
 	frame.mEndingSampleInclusive = end;
 
@@ -105,7 +105,8 @@ void SENTAnalyzer::syncPulseDetected()
 {
 	if(framelist.size() == number_of_nibbles)
 	{
-		if (framelist.at(crc_nibble_number).mData1 == CalculateCRC())
+		U8 expected_crc = CalculateCRC();
+		if (framelist.at(crc_nibble_number).mData1 == expected_crc)
 		{
 			for(std::vector<Frame>::iterator it = framelist.begin(); it != framelist.end(); it++) {
 				mResults->AddFrame( *it );
@@ -117,11 +118,13 @@ void SENTAnalyzer::syncPulseDetected()
 		else
 		{
 			mResults->CancelPacketAndStartNewPacket();
+			addErrorFrame(expected_crc, framelist.begin()->mStartingSampleInclusive, framelist.begin()->mEndingSampleInclusive, CRCError);
+			mResults->CommitPacketAndStartNewPacket();
 		}
 	}
 	else if( framelist.size() > 0 )
 	{
-		addErrorFrame(framelist.size(), framelist.begin()->mStartingSampleInclusive, framelist.begin()->mEndingSampleInclusive);
+		addErrorFrame(framelist.size(), framelist.begin()->mStartingSampleInclusive, framelist.begin()->mEndingSampleInclusive, Error);
 		mResults->CommitPacketAndStartNewPacket();
 	}
 	else /* Framelist is empty. This occurs when the first pulse is already a sync pulse */
