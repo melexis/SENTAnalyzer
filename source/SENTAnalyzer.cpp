@@ -107,13 +107,7 @@ void SENTAnalyzer::syncPulseDetected()
 	{
 		U8 expected_crc = CalculateCRC();
 		bool crc_correct = (framelist.at(crc_nibble_number).mData1 == expected_crc);
-		for(std::vector<Frame>::iterator it = framelist.begin(); it != framelist.end(); it++) {
-			if(!crc_correct && (it->mType == CRCNibble)) {
-				addErrorFrame(expected_crc, it->mStartingSampleInclusive, it->mEndingSampleInclusive, CrcError);
-			} else {
-				commitResults();
-			}
-		}
+		commit_results(crc_correct, expected_crc);
 		mResults->CommitPacketAndStartNewPacket();
 	}
 	else if( framelist.size() > 0 )
@@ -129,7 +123,7 @@ void SENTAnalyzer::syncPulseDetected()
 }
 
 
-void SENTAnalyzer::commitResults()
+void SENTAnalyzer::commit_results(bool crc_correct, U8 expected_crc)
 {
 #if 1
 	/* Sync pulse */
@@ -170,15 +164,23 @@ void SENTAnalyzer::commitResults()
 
 	for(std::vector<Frame>::iterator it = framelist.begin() + 7; it != framelist.end(); it++)
 	{
-		mResults->AddFrame(*it);
-		mResults->CommitResults();
-		ReportProgress(it->mEndingSampleInclusive );
+		if(!crc_correct && (it->mType == CRCNibble)) {
+			addErrorFrame(expected_crc, it->mStartingSampleInclusive, it->mEndingSampleInclusive, CrcError);
+		} else {
+			mResults->AddFrame(*it);
+			mResults->CommitResults();
+			ReportProgress(it->mEndingSampleInclusive );
+		}
 	}
 #else
 	for(std::vector<Frame>::iterator it = framelist.begin(); it != framelist.end(); it++) {
-		mResults->AddFrame(*it);
-		mResults->CommitResults();
-		ReportProgress(it->mEndingSampleInclusive );
+		if(!crc_correct && (it->mType == CRCNibble)) {
+			addErrorFrame(expected_crc, it->mStartingSampleInclusive, it->mEndingSampleInclusive, CrcError);
+		} else {
+			mResults->AddFrame(*it);
+			mResults->CommitResults();
+			ReportProgress(it->mEndingSampleInclusive );
+		}
 	}
 #endif
 
