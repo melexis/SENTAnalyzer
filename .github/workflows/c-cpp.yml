@@ -15,3 +15,8 @@ jobs:
       uses: lukka/get-cmake@v3.18.0
     - name: build using cmake
       run: mkdir build; cd build; cmake ..
+    - name: Save dist folder contents as artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: SENTanalyzer
+        path: build/
