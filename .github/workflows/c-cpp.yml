@@ -32,7 +32,7 @@ jobs:
       # uses: lukka/get-cmake@0c94bc3245aa84e9f8344d6d735886e6cae06894
       uses: lukka/get-cmake@v3.18.0
     - name: build using cmake
-      run: mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release ..; cmake --build .
+      run: mkdir build; cd build; cmake ..; cmake --build --config Release .
     - name: Save dist folder contents as artifacts
       uses: actions/upload-artifact@v2
       with:
