@@ -1,10 +1,11 @@
 #include "SENTAnalyzerSettings.h"
 #include <AnalyzerHelpers.h>
+#include <string>
 
 
 SENTAnalyzerSettings::SENTAnalyzerSettings()
 :	mInputChannel( UNDEFINED_CHANNEL ),
-	tick_time_half_us(3),
+	tick_time(3),
 	pausePulseEnabled(true),
 	legacyCRC(false),
 	numberOfDataNibbles(6)
@@ -13,11 +14,11 @@ SENTAnalyzerSettings::SENTAnalyzerSettings()
 	mInputChannelInterface->SetTitleAndTooltip( "Serial", "Standard SENT (SAE J2716)" );
 	mInputChannelInterface->SetChannel( mInputChannel );
 
-	tickTimeInterface.reset( new AnalyzerSettingInterfaceInteger() );
-	tickTimeInterface->SetTitleAndTooltip( "tick time (half us)",  "Specify the SENT tick time in half microseconds" );
-	tickTimeInterface->SetMax( 100 );
-	tickTimeInterface->SetMin( 1);
-	tickTimeInterface->SetInteger( tick_time_half_us );
+	tickTimeInterface.reset( new AnalyzerSettingInterfaceDouble() );
+	tickTimeInterface->SetTitleAndTooltip( "tick time (us)",  "Specify the SENT tick time in microseconds" );
+	tickTimeInterface->SetDouble( tick_time);
+	tickTimeInterface->setMax(50.0);
+	tickTimeInterface->setMax(1.5);
 
 	pausePulseInterface.reset( new AnalyzerSettingInterfaceBool() );
 	pausePulseInterface->SetTitleAndTooltip( "Pause pulse",  "Specify whether pause pulse is enabled or not" );
@@ -53,8 +54,12 @@ SENTAnalyzerSettings::~SENTAnalyzerSettings()
 
 bool SENTAnalyzerSettings::SetSettingsFromInterfaces()
 {
+	bool error_from_double_interface = false;
+	const char* error_message_from_double_interface = "";
+
 	mInputChannel = mInputChannelInterface->GetChannel();
-	tick_time_half_us = tickTimeInterface->GetInteger();
+	tick_time = tickTimeInterface->GetDouble(&error_from_double_interface, &error_message_from_double_interface);
+	AnalyzerSettings::SetErrorText(error_message_from_double_interface);
 	pausePulseEnabled = pausePulseInterface->GetValue();
 	numberOfDataNibbles = dataNibblesInterface->GetInteger();
 	legacyCRC = legacyCRCInterface->GetValue();
@@ -62,13 +67,13 @@ bool SENTAnalyzerSettings::SetSettingsFromInterfaces()
 	ClearChannels();
 	AddChannel( mInputChannel, "SENT (SAE J2716)", true );
 
-	return true;
+	return error_from_double_interface;
 }
 
 void SENTAnalyzerSettings::UpdateInterfacesFromSettings()
 {
 	mInputChannelInterface->SetChannel(mInputChannel);
-	tickTimeInterface->SetInteger(tick_time_half_us);
+	tickTimeInterface->SetDouble(tick_time);
 	pausePulseInterface->SetValue(pausePulseEnabled);
 	dataNibblesInterface->SetInteger(numberOfDataNibbles);
 	legacyCRCInterface->SetValue(legacyCRC);
@@ -80,7 +85,7 @@ void SENTAnalyzerSettings::LoadSettings( const char* settings )
 	text_archive.SetString( settings );
 
 	text_archive >> mInputChannel;
-	text_archive >> tick_time_half_us;
+	text_archive >> tick_time;
 	text_archive >> pausePulseEnabled;
 	text_archive >> numberOfDataNibbles;
 	text_archive >> legacyCRC;
@@ -96,7 +101,7 @@ const char* SENTAnalyzerSettings::SaveSettings()
 	SimpleArchive text_archive;
 
 	text_archive << mInputChannel;
-	text_archive << tick_time_half_us;
+	text_archive << tick_time;
 	text_archive << pausePulseEnabled;
 	text_archive << numberOfDataNibbles;
 	text_archive << legacyCRC;
