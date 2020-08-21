@@ -13,8 +13,8 @@ jobs:
       uses: lukka/get-cmake@v3.18.0
     - name: Build using cmake
       run: mkdir build; cd build; cmake ..; cmake --build .
-    - name: Copy build results
-      run: mkdir build/Analyzers/linux; cp build/Analyzers/*.so build/Analyzers/linux
+    - name: Move build results
+      run: mkdir build/Analyzers/linux; mv build/Analyzers/*.so build/Analyzers/linux
     - name: Store build result as artifact
       uses: actions/upload-artifact@v2
       with:
@@ -31,8 +31,8 @@ jobs:
       uses: lukka/get-cmake@v3.18.0
     - name: Build using cmake
       run: mkdir build; cd build; cmake ..; cmake --build .
-    - name: Copy build results
-      run: mkdir build/Analyzers/macOS; cp build/Analyzers/*.so build/Analyzers/macOS
+    - name: Move build results
+      run: mkdir build/Analyzers/macOS; mv build/Analyzers/*.so build/Analyzers/macOS
     - name: Store build result as artifact
       uses: actions/upload-artifact@v2
       with:
@@ -49,8 +49,8 @@ jobs:
       uses: lukka/get-cmake@v3.18.0
     - name: Build using cmake
       run: mkdir build; cd build; cmake ..; cmake --build . --config Release
-    - name: Copy build results
-      run: mkdir build/Analyzers/windows; cp build/Analyzers/Release/* build/Analyzers/windows
+    - name: Move build results
+      run: mkdir build/Analyzers/windows; mv build/Analyzers/Release/* build/Analyzers/windows
     - name: Store build result as artifact
       uses: actions/upload-artifact@v2
       with:
