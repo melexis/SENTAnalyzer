@@ -111,9 +111,7 @@ void SENTAnalyzer::syncPulseDetected()
 			if(!crc_correct && (it->mType == CRCNibble)) {
 				addErrorFrame(expected_crc, it->mStartingSampleInclusive, it->mEndingSampleInclusive, CrcError);
 			} else {
-				mResults->AddFrame( *it );
-				mResults->CommitResults();
-				ReportProgress( it->mEndingSampleInclusive );
+				commitResults();
 			}
 		}
 		mResults->CommitPacketAndStartNewPacket();
@@ -130,6 +128,61 @@ void SENTAnalyzer::syncPulseDetected()
 	framelist.clear();
 }
 
+
+void SENTAnalyzer::commitResults()
+{
+#if 1
+	/* Sync pulse */
+	mResults->AddFrame(framelist[0]);
+	mResults->CommitResults();
+	ReportProgress(framelist[0].mEndingSampleInclusive );
+
+	/* SCN */
+	mResults->AddFrame(framelist[1]);
+	mResults->CommitResults();
+	ReportProgress(framelist[1].mEndingSampleInclusive );
+
+	/* FC1 */
+	U16 fc1_data = ((framelist[2].mData1 & 0xF) << 8u) | ((framelist[3].mData1 & 0xF) << 4u) | (framelist[4].mData1 & 0xF);
+	Frame fc1_frame;
+	fc1_frame.mData1 = fc1_data;
+	fc1_frame.mFlags = 0;
+	fc1_frame.mType = FCNibble;
+	fc1_frame.mStartingSampleInclusive = framelist[2].mStartingSampleInclusive;
+	fc1_frame.mEndingSampleInclusive = framelist[4].mEndingSampleInclusive;
+
+	mResults->AddFrame(fc1_frame);
+	mResults->CommitResults();
+	ReportProgress(fc1_frame.mEndingSampleInclusive );
+
+	/* Secure counter */
+	U16 secure_counter_data = ((framelist[5].mData1 & 0xF) << 4u) | (framelist[6].mData1 & 0xF);
+	Frame secure_counter_frame;
+	secure_counter_frame.mData1 = secure_counter_data;
+	secure_counter_frame.mFlags = 0;
+	secure_counter_frame.mType = FCNibble;
+	secure_counter_frame.mStartingSampleInclusive = framelist[5].mStartingSampleInclusive;
+	secure_counter_frame.mEndingSampleInclusive = framelist[6].mEndingSampleInclusive;
+
+	mResults->AddFrame(secure_counter_frame);
+	mResults->CommitResults();
+	ReportProgress(secure_counter_frame.mEndingSampleInclusive );
+
+	for(std::vector<Frame>::iterator it = framelist.begin() + 7; it != framelist.end(); it++)
+	{
+		mResults->AddFrame(*it);
+		mResults->CommitResults();
+		ReportProgress(it->mEndingSampleInclusive );
+	}
+#else
+	for(std::vector<Frame>::iterator it = framelist.begin(); it != framelist.end(); it++) {
+		mResults->AddFrame(*it);
+		mResults->CommitResults();
+		ReportProgress(it->mEndingSampleInclusive );
+	}
+#endif
+
+}
 /** Function for correcting the tick time
  *
  *  This function should be called whenever a sync pulse is detected (given the specified clock tolerances)

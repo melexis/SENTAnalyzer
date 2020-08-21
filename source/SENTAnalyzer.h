@@ -40,6 +40,7 @@ protected: //vars
 	U32 corrected_samples_per_tick;
 
 	void syncPulseDetected();
+	void commitResults();
 	void correctTickTime(U32 number_of_samples);
 	U8 CalculateCRC();
 	bool isPulseSyncPulse(U16 number_of_ticks);
