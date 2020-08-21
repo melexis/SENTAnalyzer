@@ -7,26 +7,92 @@ This plugin allows decoding SENT frames of up to 6 data nibbles and allows expor
 - Builtin slow message decoding
 - Automatic detection of tick time
 - SPC support
-- Aggregation of individual nibble data into into FC1/FC2 data --> Loads of different configurations, could get complex 
+- Aggregation of individual nibble data into into FC1/FC2 data --> Loads of different configurations, could get complex
 
 ## Building the plugin:
 
-First off, make sure to update/populate the submodules used in the project. These submodules contain the Saleae-provided libraries needed to succesfully build the plugin. In case you don't use the git interface (you downloaded the project as a zip), you need to follow the AnalyzerSDK link in github, download that project separately, and extract it in the folder where the SENTAnalyzer files are stored
+If you're just here to grab the latest copy of the analyzer, the easiest option would be to grab the build artifacts from
+the results of the CI pipeline. If you'd like to make modifications or are convinced you can build it better, keep reading:
 
-### Windows:
+### MacOS
 
-- Open "Visual Studio/SENTAnalyzer.sln" to open project in visual studio
-- Depending on the version used, vs might ask to upgrade the project files
-- Default build configuration is for "win32". You likely need to change this to "x64"
-- Build project. Dll file is generated in "Visual Studio\x64\Release\SENTAnalyzer.dll" 
+Dependencies:
+- XCode with command line tools
+- CMake 3.11+
 
-### Linux/OSX:
+Installing command line tools after XCode is installed:
+```
+xcode-select --install
+```
 
-run the build_analyzer.py script. The compiled libraries can be found in the newly created debug and release folders.
+Then open XCode, open Preferences from the main menu, go to locations, and select the only option under 'Command line tools'.
+
+Installing CMake on MacOS:
+
+1. Download the binary distribution for MacOS, `cmake-*-Darwin-x86_64.dmg`
+2. Install the usual way by dragging into applications.
+3. Open a terminal and run the following:
+```
+/Applications/CMake.app/Contents/bin/cmake-gui --install
+```
+*Note: Errors may occur if older versions of CMake are installed.*
+
+Building the analyzer:
+```
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
+
+### Ubuntu 16.04
+
+Dependencies:
+- CMake 3.11+
+- gcc 4.8+
+
+Misc dependencies:
 
 ```
-python build_analyzer.py
+sudo apt-get install build-essential
 ```
+
+Building the analyzer:
+```
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
+
+### Windows
+
+Dependencies:
+- Visual Studio 2015 Update 3
+- CMake 3.11+
+
+**Visual Studio 2015**
+
+*Note - newer versions of Visual Studio should be fine.*
+
+Setup options:
+- Programming Languages > Visual C++ > select all sub-components.
+
+Note - if CMake has any problems with the MSVC compiler, it's likely a component is missing.
+
+**CMake**
+
+Download and install the latest CMake release here.
+https://cmake.org/download/
+
+Building the analyzer:
+```
+mkdir build
+cd build
+cmake ..
+```
+
+Then, open the newly created solution file located here: `build\SENT_analyzer.sln`
 
 ## Installing the plugin:
 
@@ -92,6 +158,6 @@ At the moment, the output format looks like this:
 0.001795250000000, 0x64, PAUSE_PULSE
 ```
 
-Note that more formats will likely be added, as the format shown above does not allow for the fastest data processing. We will likely add a format that groups the 
+Note that more formats will likely be added, as the format shown above does not allow for the fastest data processing. We will likely add a format that groups the
 for a single SENT frame on a single line (with a timestamp for the beginning of the SENT message)
 
