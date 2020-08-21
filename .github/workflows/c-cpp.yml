@@ -21,7 +21,7 @@ jobs:
         name: SENTanalyzer
         path: build/Analyzers
 
-  build-linux:
+  build-macos:
 
     runs-on: macos-latest
 
