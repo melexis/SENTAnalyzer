@@ -14,7 +14,7 @@ jobs:
     - name: Build using cmake
       run: mkdir build; cd build; cmake ..; cmake --build .
     - name: Copy build results
-      run: mkdir build/Analyzers/linux; cp build/Analyzers/* build/Analyzers/linux
+      run: mkdir build/Analyzers/linux; cp build/Analyzers/*.so build/Analyzers/linux
     - name: Store build result as artifact
       uses: actions/upload-artifact@v2
       with:
@@ -32,7 +32,7 @@ jobs:
     - name: Build using cmake
       run: mkdir build; cd build; cmake ..; cmake --build .
     - name: Copy build results
-      run: mkdir build/Analyzers/macOS; cp build/Analyzers/* build/Analyzers/macOS
+      run: mkdir build/Analyzers/macOS; cp build/Analyzers/*.so build/Analyzers/macOS
     - name: Store build result as artifact
       uses: actions/upload-artifact@v2
       with:
