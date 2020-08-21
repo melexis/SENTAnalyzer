@@ -5,20 +5,35 @@ on: push
 jobs:
   build-linux:
 
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest]
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: get-cmake
-      # You may pin to the exact commit or the version.
-      # uses: lukka/get-cmake@0c94bc3245aa84e9f8344d6d735886e6cae06894
+    - name: Install newer version of cmake
       uses: lukka/get-cmake@v3.18.0
-    - name: build using cmake
+    - name: Build using cmake
       run: mkdir build; cd build; cmake ..; cmake --build .
-    - name: Save dist folder contents as artifacts
+    - name: Copy build results
+      run: mkdir build/Analyzers/linux; cp build/Analyzers/* build/Analyzers/linux
+    - name: Store build result as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: SENTanalyzer
+        path: build/Analyzers
+
+  build-linux:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install newer version of cmake
+      uses: lukka/get-cmake@v3.18.0
+    - name: Build using cmake
+      run: mkdir build; cd build; cmake ..; cmake --build .
+    - name: Copy build results
+      run: mkdir build/Analyzers/macOS; cp build/Analyzers/* build/Analyzers/macOS
+    - name: Store build result as artifact
       uses: actions/upload-artifact@v2
       with:
         name: SENTanalyzer
@@ -30,13 +45,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: get-cmake
-      # You may pin to the exact commit or the version.
-      # uses: lukka/get-cmake@0c94bc3245aa84e9f8344d6d735886e6cae06894
+    - name: Install newer version of cmake
       uses: lukka/get-cmake@v3.18.0
-    - name: build using cmake
+    - name: Build using cmake
       run: mkdir build; cd build; cmake ..; cmake --build . --config Release
-    - name: Save dist folder contents as artifacts
+    - name: Copy build results
+      run: mkdir build/Analyzers/windows; cp build/Analyzers/Release/* build/Analyzers/windows
+    - name: Store build result as artifact
       uses: actions/upload-artifact@v2
       with:
         name: SENTanalyzer
