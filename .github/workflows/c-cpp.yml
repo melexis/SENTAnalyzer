@@ -1,23 +1,58 @@
 name: C/C++ CI
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: push
 
 jobs:
-  build:
+  build-linux:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: configure
-      run: ./configure
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+    - name: Install newer version of cmake
+      uses: lukka/get-cmake@v3.18.0
+    - name: Build using cmake
+      run: mkdir build; cd build; cmake ..; cmake --build .
+    - name: Move build results
+      run: mkdir build/Analyzers/linux; mv build/Analyzers/*.so build/Analyzers/linux
+    - name: Store build result as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: SENTanalyzer
+        path: build/Analyzers
+
+  build-macos:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install newer version of cmake
+      uses: lukka/get-cmake@v3.18.0
+    - name: Build using cmake
+      run: mkdir build; cd build; cmake ..; cmake --build .
+    - name: Move build results
+      run: mkdir build/Analyzers/macOS; mv build/Analyzers/*.so build/Analyzers/macOS
+    - name: Store build result as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: SENTanalyzer
+        path: build/Analyzers
+
+  build-windows:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install newer version of cmake
+      uses: lukka/get-cmake@v3.18.0
+    - name: Build using cmake
+      run: mkdir build; cd build; cmake ..; cmake --build . --config Release
+    - name: Move build results
+      run: mkdir build/Analyzers/windows; mv build/Analyzers/Release/* build/Analyzers/windows
+    - name: Store build result as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: SENTanalyzer
+        path: build/Analyzers
